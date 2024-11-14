@@ -11,14 +11,21 @@ export const StatusBar = ({ summary = {}, devices = [], loading = false }) => {
     total: devices.length
   };
 
-  // 計算平均稼動率
+  /**
+   * 計算平均稼動率
+   * 只計算已連線設備的平均值，未連線設備保持顯示 0
+   */
   const averageEfficiency = devices.length > 0
-    ? devices.reduce((sum, device) => {
-        const rate = device.rates?.operation ? parseFloat(device.rates.operation) : 0;
-        return sum + rate;
-      }, 0) / devices.length
+    ? devices
+        .filter(device => device.connected)  // 只選擇已連線的設備
+        .reduce((sum, device) => {
+          // 保持原有的 rates 判斷邏輯
+          const rate = device.rates?.operation ? parseFloat(device.rates.operation) : 0;
+          return sum + rate;
+        }, 0) / (devices.filter(device => device.connected).length || 1)  // 避免除以 0
     : 0;
 
+  // 格式化顯示，保持兩位小數
   const formattedEfficiency = averageEfficiency.toFixed(2);
 
   return (
