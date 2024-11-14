@@ -63,51 +63,68 @@ export const MachineStatus = ({ data }) => {
             className="w-full h-full transform -rotate-90"
             viewBox="0 0 100 100"
           >
-            <motion.circle
-              initial={{ strokeDasharray: "0 283" }}
-              animate={{
-                strokeDasharray: `${data.percentage.idle * 2.83} ${283 - data.percentage.idle * 2.83}`,
-              }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              cx="50"
-              cy="50"
-              r="45"
-              fill="none"
-              stroke="#93c5fd"
-              strokeWidth="10"
-              strokeLinecap="round"
-            />
-            <motion.circle
-              initial={{ strokeDasharray: "0 283" }}
-              animate={{
-                strokeDasharray: `${data.percentage.running * 2.83} ${283 - data.percentage.running * 2.83}`,
-                strokeDashoffset: -data.percentage.idle * 2.83,
-              }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              cx="50"
-              cy="50"
-              r="45"
-              fill="none"
-              stroke="#4ade80"
-              strokeWidth="10"
-              strokeLinecap="round"
-            />
-            <motion.circle
-              initial={{ strokeDasharray: "0 283" }}
-              animate={{
-                strokeDasharray: `${data.percentage.error * 2.83} ${283 - data.percentage.error * 2.83}`,
-                strokeDashoffset:
-                  -(data.percentage.idle + data.percentage.running) * 2.83,
-              }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              cx="50"
-              cy="50"
-              r="45"
-              fill="none"
-              stroke="#ef4444"
-              strokeWidth="10"
-              strokeLinecap="round"
-            />
+            {data.percentage.offline === 100 ? (
+              // 當完全離線時，顯示一個完整的灰色圓
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                fill="none"
+                stroke="#4B5563" // 灰色
+                strokeWidth="10"
+                strokeDasharray="283 283" // 完整圓形
+                strokeLinecap="round"
+              />
+            ) : (
+              // 原有的圓餅圖邏輯
+              <>
+                <motion.circle
+                  initial={{ strokeDasharray: "0 283" }}
+                  animate={{
+                    strokeDasharray: `${data.percentage.idle * 2.83} ${283 - data.percentage.idle * 2.83}`,
+                  }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                  cx="50"
+                  cy="50"
+                  r="45"
+                  fill="none"
+                  stroke="#93c5fd"
+                  strokeWidth="10"
+                  strokeLinecap="round"
+                />
+                <motion.circle
+                  initial={{ strokeDasharray: "0 283" }}
+                  animate={{
+                    strokeDasharray: `${data.percentage.running * 2.83} ${283 - data.percentage.running * 2.83}`,
+                    strokeDashoffset: -data.percentage.idle * 2.83,
+                  }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                  cx="50"
+                  cy="50"
+                  r="45"
+                  fill="none"
+                  stroke="#4ade80"
+                  strokeWidth="10"
+                  strokeLinecap="round"
+                />
+                <motion.circle
+                  initial={{ strokeDasharray: "0 283" }}
+                  animate={{
+                    strokeDasharray: `${data.percentage.error * 2.83} ${283 - data.percentage.error * 2.83}`,
+                    strokeDashoffset:
+                      -(data.percentage.idle + data.percentage.running) * 2.83,
+                  }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                  cx="50"
+                  cy="50"
+                  r="45"
+                  fill="none"
+                  stroke="#ef4444"
+                  strokeWidth="10"
+                  strokeLinecap="round"
+                />
+              </>
+            )}
           </svg>
         </div>
       </div>

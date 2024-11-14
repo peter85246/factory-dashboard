@@ -5,7 +5,7 @@
 import React, { useState } from "react";
 import { Card } from "../ui/card";
 import { MachineStatus } from "./MachineStatus";
-import { Activity, AlertTriangle } from "lucide-react";
+import { Activity, AlertTriangle, AlertOctagon, Layers } from "lucide-react";
 import { StatusBar } from './StatusBar';
 import { useStatusData } from '../../hooks/useStatusData';
 
@@ -69,6 +69,32 @@ export const MonitorView = () => {
       });
   }, [devices]);
 
+  // 添加統計數據計算
+  const statistics = React.useMemo(() => {
+    if (!transformedDevices.length) return {
+      averageErrorRate: "0.00",
+      totalWorkCount: 0
+    };
+
+    // 計算平均異常率
+    const totalErrorRate = transformedDevices.reduce(
+      (sum, device) => sum + device.statusDetails.error,
+      0
+    );
+    const averageErrorRate = (totalErrorRate / transformedDevices.length).toFixed(2);
+
+    // 計算總加工數量
+    const totalWorkCount = transformedDevices.reduce(
+      (sum, device) => sum + device.workCount,
+      0
+    );
+
+    return {
+      averageErrorRate,
+      totalWorkCount
+    };
+  }, [transformedDevices]);
+
   // 如果有數據就直接顯示，不等待 loading 狀態
   const shouldShowContent = devices.length > 0;
 
@@ -96,6 +122,47 @@ export const MonitorView = () => {
           )}
         </div>
       </div>
+
+      {/* 新增：統計卡片 */}
+      {shouldShowContent && (
+        <div className="grid grid-cols-2 gap-6 mb-6">
+          {/* 平均異常率卡片 */}
+          <Card className="bg-gray-900 p-6 border border-gray-800 relative overflow-hidden">
+            {/* 添加閃爍效果背景 */}
+            <div className="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-500/20 to-red-500/0 animate-shimmer" />
+            
+            <div className="relative z-10 flex items-center space-x-4">
+              <div className="p-3 bg-red-500/10 rounded-lg">
+                <AlertOctagon className="h-6 w-6 text-red-500" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-400">平均異常率</p>
+                <p className="text-2xl font-semibold text-red-400 animate-pulse-slow">
+                  {statistics.averageErrorRate}%
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          {/* 總加工數量卡片 */}
+          <Card className="bg-gray-900 p-6 border border-gray-800 relative overflow-hidden">
+            {/* 添加閃爍效果背景 */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/20 to-blue-500/0 animate-shimmer" />
+            
+            <div className="relative z-10 flex items-center space-x-4">
+              <div className="p-3 bg-blue-500/10 rounded-lg">
+                <Layers className="h-6 w-6 text-blue-500" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-400">總加工數量</p>
+                <p className="text-2xl font-semibold text-blue-400 animate-pulse-slow">
+                  {statistics.totalWorkCount.toLocaleString()}
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {/* 設備卡片網格 */}
       {shouldShowContent && (

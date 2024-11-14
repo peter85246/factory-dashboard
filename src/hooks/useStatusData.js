@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { factoryApi } from '../services/factoryApi';
 
+/**
+ * 設備狀態數據 Hook
+ * 用於獲取並管理所有設備的即時狀態數據
+ * @returns {Object} 包含設備摘要、設備列表、加載狀態和錯誤信息
+ */
 export const useStatusData = () => {
   const [summary, setSummary] = useState({
     error: 0,
@@ -17,6 +22,10 @@ export const useStatusData = () => {
     let isMounted = true;
     let updateInterval;
 
+    /**
+     * 獲取設備數據
+     * 從 API 獲取最新的設備狀態數據並更新狀態
+     */
     const fetchData = async () => {
       try {
         const response = await factoryApi.device.getAllDevices();

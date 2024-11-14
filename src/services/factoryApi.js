@@ -48,6 +48,50 @@ export const factoryApi = {
         console.error('Error fetching assigned device:', error);
         throw error;
       }
+    },
+
+    getYearDeviceData: async (year) => {
+      try {
+        console.log('Fetching year data:', year);
+        
+        const response = await axios({
+          method: 'post',
+          url: `${API_CONFIG.baseUrl}/api/AREditior/GetYearDeviceData`,
+          data: {
+            year: year.toString(),
+            month: "0"
+          },
+          headers: API_CONFIG.headers
+        });
+
+        console.log('Year API response:', response.data);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching year device data:', error);
+        throw error;
+      }
+    },
+
+    getMonthDeviceData: async (year, month) => {
+      try {
+        console.log('Fetching month data:', year, month);
+        
+        const response = await axios({
+          method: 'post',
+          url: `${API_CONFIG.baseUrl}/api/AREditior/GetMonthDeviceData`,
+          data: {
+            year: year.toString(),
+            month: month.toString()
+          },
+          headers: API_CONFIG.headers
+        });
+
+        console.log('Month API response:', response.data);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching month device data:', error);
+        throw error;
+      }
     }
   }
 };

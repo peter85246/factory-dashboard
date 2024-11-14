@@ -143,7 +143,7 @@ export const Statistics = () => {
             {devices.map(device => (
               <div key={device.id} className="bg-gray-800 p-4 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-gray-300">{device.id}</span>
+                  <span className="text-gray-300">{device.name}</span>
                   <span className={`
                     ${device.status === "running" ? "text-green-400" : ""}
                     ${device.status === "idle" ? "text-blue-400" : ""}

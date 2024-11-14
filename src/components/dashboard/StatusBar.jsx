@@ -1,16 +1,17 @@
 import React from "react";
-import { Activity, AlertTriangle, Clock, Percent, WifiOff } from "lucide-react";
+import { Activity, AlertTriangle, Clock, Percent, Wifi } from "lucide-react";
 
 export const StatusBar = ({ summary = {}, devices = [], loading = false }) => {
-  // 直接從 API 返回的 devices 數據計算狀態
+  // 修改狀態計算
   const statusCounts = {
     error: devices.filter(d => d.status === 'error').length,
     idle: devices.filter(d => d.status === 'idle').length,
     running: devices.filter(d => d.status === 'running').length,
-    offline: devices.filter(d => !d.connected).length
+    connected: devices.filter(d => d.connected).length,
+    total: devices.length
   };
 
-  // 計算平均稼動率（從 operationRate）
+  // 計算平均稼動率
   const averageEfficiency = devices.length > 0
     ? devices.reduce((sum, device) => {
         const rate = device.rates?.operation ? parseFloat(device.rates.operation) : 0;
@@ -19,23 +20,6 @@ export const StatusBar = ({ summary = {}, devices = [], loading = false }) => {
     : 0;
 
   const formattedEfficiency = averageEfficiency.toFixed(2);
-
-  // 計算警告數量
-  const warningCount = devices.filter(d => d.warning).length;
-
-  console.log('StatusBar Data:', {
-    devices,
-    statusCounts,
-    averageEfficiency,
-    warningCount,
-    rawDevices: devices.map(d => ({
-      id: d.id,
-      status: d.status,
-      connected: d.connected,
-      warning: d.warning,
-      rates: d.rates
-    }))
-  });
 
   return (
     <div className="bg-gray-900 rounded-lg p-4">
@@ -62,32 +46,27 @@ export const StatusBar = ({ summary = {}, devices = [], loading = false }) => {
           hoverColor="green"
         />
         <StatusItem
-          icon={<WifiOff className="text-gray-400" />}
-          label="未連線"
-          value={statusCounts.offline}
+          icon={<Wifi className="text-yellow-400" />}
+          label="已連線"
+          value={statusCounts.connected}
+          showTotal={true}
+          hoverColor="yellow"
+        />
+        <StatusItem
+          icon={<Activity className="text-gray-400" />}
+          label="設備總數"
+          value={statusCounts.total}
           showTotal={true}
           hoverColor="gray"
         />
         <StatusItem
           icon={<Percent className="text-cyan-400" />}
           label="平均稼動率"
-          value={`${formattedEfficiency}`}
+          value={formattedEfficiency}
           showTotal={false}
           hoverColor="cyan"
         />
-        <StatusItem
-          icon={<AlertTriangle className={`${warningCount > 0 ? "text-yellow-400 animate-pulse" : "text-gray-400"}`} />}
-          label="警告數"
-          value={warningCount}
-          showTotal={true}
-          hoverColor="yellow"
-        />
       </div>
-      {/* {loading && (
-        <div className="text-sm text-blue-400 animate-pulse mt-2">
-          資料更新中...
-        </div>
-      )} */}
     </div>
   );
 };

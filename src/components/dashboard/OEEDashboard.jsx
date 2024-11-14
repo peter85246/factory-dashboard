@@ -1,4 +1,7 @@
-import React, { useEffect, useState } from "react";
+/**
+ * UI頁面：稼動率資訊
+ */
+import React, { useEffect, useState, useMemo } from "react";
 import { Card } from "../ui/card";
 import { factoryApi } from '../../services/factoryApi';
 import { StatusBar } from './StatusBar';  // 添加這行
@@ -15,100 +18,129 @@ import {
 } from "recharts";
 
 export const OEEDashboard = () => {
-  const [weeklyData, setWeeklyData] = useState([]);
+  const [deviceData, setDeviceData] = useState([]);
   const [monthlyStats, setMonthlyStats] = useState({
     efficiency: "0.0000",
     availability: "0.0000"
   });
+  
+  const [timeRange, setTimeRange] = useState('month');
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+
+  // 添加 dates 定義
+  const dates = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    return {
+      // 生成年份選項（從 2020 到當前年份）
+      years: Array.from(
+        { length: currentYear - 2019 },
+        (_, i) => currentYear - i
+      ),
+      // 生成月份選項（1-12月）
+      months: Array.from(
+        { length: 12 },
+        (_, i) => i + 1
+      )
+    };
+  }, []);
 
   const { summary, devices, loading } = useStatusData();
-
-  // 計算當前統計數據
-  const calculateCurrentStats = (devices) => {
-    const connectedDevices = devices.filter(device => device.connected);
-    if (connectedDevices.length === 0) return { efficiency: "0.0000", availability: "0.0000" };
-
-    // 設備稼動率 = 運行時間 / 總時間
-    const totalAvailability = connectedDevices.reduce((sum, device) => {
-      return sum + parseFloat(device.rates.operation);
-    }, 0);
-
-    // 設備綜合效率 (OEE) = 稼動率 × 性能效率 × 良品率
-    const totalOEE = connectedDevices.reduce((sum, device) => {
-      // 稼動率 (Availability)
-      const availability = parseFloat(device.rates.operation) / 100;
+  
+  // fetchDeviceData 函數
+  const fetchDeviceData = async () => {
+    try {
+      console.log('Fetching data for:', timeRange, selectedYear, selectedMonth);
       
-      // 性能效率 (Performance) = 實際速度/標準速度
-      const performance = device.spindleSpeed ? 
-        (parseFloat(device.spindleSpeed) / parseFloat(device.feedRate || 1)) : 0.8; // 預設 0.8
-      
-      // 良品率 (Quality) - 如果有不良品數據，可以加入計算
-      const quality = 0.95; // 預設 95% 良品率
-      
-      // 單機 OEE
-      const machineOEE = availability * performance * quality;
-      return sum + machineOEE;
-    }, 0);
-
-    return {
-      efficiency: (totalOEE / connectedDevices.length * 100).toFixed(4),
-      availability: (totalAvailability / connectedDevices.length).toFixed(4)
-    };
-  };
-
-  // 生成週數據
-  const generateWeeklyData = (currentStats) => {
-    const baseEfficiency = parseFloat(currentStats.efficiency);
-    const baseAvailability = parseFloat(currentStats.availability);
-    
-    // 生成更真實的變化數據
-    return [
-      { 
-        name: "週一", 
-        OEE: (baseEfficiency * 0.92).toFixed(2),      // OEE 通常低於稼動率
-        稼動率: (baseAvailability * 0.97).toFixed(2)
-      },
-      { 
-        name: "週二", 
-        OEE: (baseEfficiency * 0.94).toFixed(2), 
-        稼動率: (baseAvailability * 0.98).toFixed(2)
-      },
-      { 
-        name: "週三", 
-        OEE: (baseEfficiency * 0.96).toFixed(2), 
-        稼動率: (baseAvailability * 1.02).toFixed(2)
-      },
-      { 
-        name: "週四", 
-        OEE: (baseEfficiency * 0.93).toFixed(2), 
-        稼動率: (baseAvailability * 0.99).toFixed(2)
-      },
-      { 
-        name: "週五", 
-        OEE: (baseEfficiency * 0.95).toFixed(2), 
-        稼動率: (baseAvailability * 1.01).toFixed(2)
-      },
-      { 
-        name: "週六", 
-        OEE: (baseEfficiency * 0.91).toFixed(2), 
-        稼動率: (baseAvailability * 0.96).toFixed(2)
-      },
-      { 
-        name: "週日", 
-        OEE: baseEfficiency.toFixed(2), 
-        稼動率: baseAvailability.toFixed(2)
+      let response;
+      if (timeRange === 'year') {
+        console.log('Fetching year data for:', selectedYear);
+        response = await factoryApi.device.getYearDeviceData(selectedYear);
+        console.log('Year data response:', response);
+      } else {
+        response = await factoryApi.device.getMonthDeviceData(selectedYear, selectedMonth);
       }
-    ];
+
+      if (!response || response.code !== '0000') {
+        console.error('API Error:', response);
+        throw new Error('Invalid API response');
+      }
+
+      // 轉換 API 數據為圖表所需格式，不要在這裡 toFixed
+      const formattedData = response.result.map(item => ({
+        name: timeRange === 'year' ? `${item.month || ''}月` : `${item.day}日`,
+        稼動率: parseFloat(item.utilization_rate || 0),  // 移除 toFixed
+        設備數: item.device_count || 0,
+        OEE: calculateOEE(item.utilization_rate || 0)    // 移除 toFixed
+      }));
+
+      console.log('Raw data:', response.result);
+      console.log('Formatted data:', formattedData);
+      
+      // 更新統計數據
+      if (formattedData.length > 0) {
+        const validData = formattedData.filter(item => item.設備數 > 0);
+        console.log('Valid data for stats:', validData);
+        
+        // 計算平均值
+        const avgOEE = validData.length > 0 
+          ? (validData.reduce((sum, item) => sum + item.OEE, 0) / validData.length).toFixed(4)
+          : "0.0000";
+        
+        const avgAvailability = validData.length > 0
+          ? (validData.reduce((sum, item) => sum + item.稼動率, 0) / validData.length).toFixed(4)
+          : "0.0000";
+        
+        console.log('Raw averages:', {
+          OEE: avgOEE,
+          availability: avgAvailability
+        });
+
+        setMonthlyStats({
+          efficiency: avgOEE,
+          availability: avgAvailability
+        });
+      }
+
+      // 在設置到 state 之前再處理顯示格式
+      const displayData = formattedData.map(item => ({
+        ...item,
+        稼動率: item.稼動率.toFixed(2),
+        OEE: item.OEE.toFixed(2)
+      }));
+
+      setDeviceData(displayData);
+
+    } catch (error) {
+      console.error('Error in fetchDeviceData:', error);
+      setDeviceData([]);
+      setMonthlyStats({
+        efficiency: "0.0000",
+        availability: "0.0000"
+      });
+    }
   };
 
-  // 更新數據
+  // 移除原有的 useEffect，只保留 API 相關的
   useEffect(() => {
-    if (devices.length > 0) {
-      const currentStats = calculateCurrentStats(devices);
-      setMonthlyStats(currentStats);
-      setWeeklyData(generateWeeklyData(currentStats));
+    fetchDeviceData();
+  }, [timeRange, selectedYear, selectedMonth]);
+
+  // 格式化標題
+  const getTimeRangeTitle = () => {
+    if (timeRange === 'year') {
+      return `${selectedYear}年度`;
     }
-  }, [devices]);
+    return `${selectedYear}年${selectedMonth}月`;
+  };
+
+  // 計算 OEE
+  const calculateOEE = (utilizationRate) => {
+    const availability = parseFloat(utilizationRate) / 100;
+    const performance = 0.8;  // 性能效率 80%
+    const quality = 0.95;     // 良品率 95%
+    return availability * performance * quality * 100;
+  };
 
   return (
     <div className="space-y-6">
@@ -117,33 +149,96 @@ export const OEEDashboard = () => {
         devices={devices} 
         loading={loading} 
       />
+
+      {/* 添加時間選擇器 */}
+      <div className="bg-[#0B1015] p-4">
+        <div className="flex gap-4 items-center">
+          <select 
+            className="bg-gray-800 text-white px-3 py-1 rounded-md border border-gray-700"
+            value={timeRange}
+            onChange={(e) => setTimeRange(e.target.value)}
+          >
+            <option value="month">月</option>
+            <option value="year">年</option>
+          </select>
+
+          {/* 年份選擇 */}
+          <select 
+            className="bg-gray-800 text-white px-3 py-1 rounded-md border border-gray-700"
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+          >
+            {dates.years.map(year => (
+              <option key={year} value={year}>{year}年</option>
+            ))}
+          </select>
+
+          {/* 月份選擇（當選擇月視圖時顯示） */}
+          {timeRange === 'month' && (
+            <select 
+              className="bg-gray-800 text-white px-3 py-1 rounded-md border border-gray-700"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(Number(e.target.value))}
+            >
+              {dates.months.map(month => (
+                <option key={month} value={month}>{month}月</option>
+              ))}
+            </select>
+          )}
+        </div>
+      </div>
+
       {/* OEE 指標卡片 */}
       <div className="grid grid-cols-2 gap-4">
-        <Card className="p-4 bg-gray-900 text-white">
-          <h3 className="text-gray-400">設備綜合效率</h3>
-          <div className="text-3xl font-bold text-green-400 mt-2">
-            {monthlyStats.efficiency}%
+        {/* 設備綜合效率卡片 */}
+        <Card className="p-4 bg-gray-900 text-white relative overflow-hidden">
+          {/* 添加閃爍效果背景 */}
+          <div className="absolute inset-0 bg-gradient-to-r from-green-500/0 via-green-500/20 to-green-500/0 animate-shimmer" />
+          
+          <div className="relative z-10">
+            <h3 className="text-gray-400">設備綜合效率 ({getTimeRangeTitle()})</h3>
+            <div className="text-3xl font-bold text-green-400 mt-2 animate-pulse-slow">
+              {monthlyStats.efficiency}%
+            </div>
           </div>
         </Card>
-        <Card className="p-4 bg-gray-900 text-white">
-          <h3 className="text-gray-400">設備稼動率</h3>
-          <div className="text-3xl font-bold text-blue-400 mt-2">
-            {monthlyStats.availability}%
+
+        {/* 設備稼動率卡片 */}
+        <Card className="p-4 bg-gray-900 text-white relative overflow-hidden">
+          {/* 添加閃爍效果背景 */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/20 to-blue-500/0 animate-shimmer" />
+          
+          <div className="relative z-10">
+            <h3 className="text-gray-400">設備稼動率 ({getTimeRangeTitle()})</h3>
+            <div className="text-3xl font-bold text-blue-400 mt-2 animate-pulse-slow">
+              {monthlyStats.availability}%
+            </div>
           </div>
         </Card>
       </div>
 
       {/* 趨勢圖 */}
       <Card className="p-6 bg-gray-900 text-white">
-        <h3 className="text-lg font-semibold mb-4">OEE 趨勢分析</h3>
+        <h3 className="text-lg font-semibold mb-4">
+          OEE 趨勢分析 ({getTimeRangeTitle()})
+        </h3>
         <div className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={weeklyData}>
+            <LineChart data={deviceData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis
                 dataKey="name"
                 stroke="#9CA3AF"
                 tick={{ fill: "#9CA3AF" }}
+                interval={0}
+                ticks={
+                  timeRange === 'year' 
+                    ? undefined
+                    : Array.from(
+                        { length: 16 },
+                        (_, i) => (i * 2 + 1) + '日'
+                      )
+                }
               />
               <YAxis
                 stroke="#9CA3AF"
@@ -174,6 +269,7 @@ export const OEEDashboard = () => {
               <Line
                 type="monotone"
                 dataKey="OEE"
+                name="OEE"
                 stroke="#10B981"
                 strokeWidth={2}
                 dot={{ fill: "#10B981", strokeWidth: 2 }}
@@ -182,6 +278,7 @@ export const OEEDashboard = () => {
               <Line
                 type="monotone"
                 dataKey="稼動率"
+                name="稼動率"
                 stroke="#3B82F6"
                 strokeWidth={2}
                 dot={{ fill: "#3B82F6", strokeWidth: 2 }}
@@ -194,13 +291,15 @@ export const OEEDashboard = () => {
 
       {/* 詳細數據表格 */}
       <Card className="p-6 bg-gray-900 text-white">
-        <h3 className="text-lg font-semibold mb-4">詳細數據</h3>
+        <h3 className="text-lg font-semibold mb-4">
+          詳細數據 ({getTimeRangeTitle()})
+        </h3>
         <div className="overflow-x-auto rounded-lg border border-gray-800">
           <table className="w-full table-fixed">
             <thead>
               <tr className="bg-gray-800/50">
                 <th className="w-1/3 px-4 py-3 text-left text-sm font-semibold text-gray-400">
-                  日期
+                  {timeRange === 'year' ? '月份' : '日期'}
                 </th>
                 <th className="w-1/3 px-4 py-3 text-center text-sm font-semibold text-gray-400">
                   OEE
@@ -211,22 +310,19 @@ export const OEEDashboard = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
-              {weeklyData.map((day) => (
-                <tr
-                  key={day.name}
-                  className="hover:bg-gray-800/30 transition-colors duration-150"
-                >
+              {deviceData.map((item) => (
+                <tr key={item.name}>
                   <td className="px-4 py-3 text-sm text-gray-300">
-                    {day.name}
+                    {item.name}
                   </td>
                   <td className="px-4 py-3 text-center">
                     <span className="text-sm font-medium text-green-400">
-                      {day.OEE}%
+                      {item.OEE}%
                     </span>
                   </td>
                   <td className="px-4 py-3 text-center">
                     <span className="text-sm font-medium text-blue-400">
-                      {day.稼動率}%
+                      {item.稼動率}%
                     </span>
                   </td>
                 </tr>

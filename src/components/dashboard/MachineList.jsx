@@ -171,177 +171,192 @@ const MachineStatusRow = ({ data }) => {
   return (
     <div
       className={`
-      p-4 
-      flex items-center 
-      border 
-      ${config.borderColor}
-      ${config.hoverBorder}
-      ${config.hoverShadow}
-      transition-all duration-300
-      hover:bg-gray-800/50
-      rounded-lg
-      group
-      relative
-      overflow-hidden
-      gap-4
-    `}
+        p-4 
+        flex items-center 
+        border 
+        ${config.borderColor}
+        ${config.hoverBorder}
+        ${config.hoverShadow}
+        transition-all duration-300
+        hover:bg-gray-800/50
+        rounded-lg
+        group
+        relative
+        overflow-hidden
+        gap-4
+      `}
     >
+      {/* 調整光暈效果透明度 */}
+      <div className={`
+        absolute inset-0 
+        bg-gradient-to-r 
+        ${data.status === "running" ? "from-green-500/0 via-green-500/20 to-green-500/0" : ""}
+        ${data.status === "idle" ? "from-blue-500/0 via-blue-500/20 to-blue-500/0" : ""}
+        ${data.status === "error" ? "from-red-500/0 via-red-500/20 to-red-500/0" : ""}
+        ${data.status === "offline" ? "from-gray-500/0 via-gray-500/20 to-gray-500/0" : ""}
+        animate-shimmer
+      `} />
+
       {/* 左側狀態指示條 */}
       <div
         className={`
-        absolute left-0 top-0 bottom-0 w-1
-        ${data.status === "running" ? "bg-green-500" : ""}
-        ${data.status === "idle" ? "bg-blue-500" : ""}
-        ${data.status === "error" ? "bg-red-500" : ""}
-        ${data.status === "offline" ? "bg-gray-500" : ""}
-      `}
+          absolute left-0 top-0 bottom-0 w-1
+          ${data.status === "running" ? "bg-green-500" : ""}
+          ${data.status === "idle" ? "bg-blue-500" : ""}
+          ${data.status === "error" ? "bg-red-500" : ""}
+          ${data.status === "offline" ? "bg-gray-500" : ""}
+          z-10
+        `}
       />
 
-      {/* 左側機台資訊 */}
-      <div className="w-48 flex items-center gap-4 pl-3">
-        <div className="relative">
-          <div
-            className={`
-            bg-gray-800/80 
-            backdrop-blur-sm 
-            p-4 
-            rounded-lg
-            border border-gray-700/50
-            group-hover:scale-105
-            transition-transform duration-300
-            flex items-center gap-2
-          `}
-          >
-            <Activity className={`h-4 w-4 ${config.iconColor}`} />
-            <span className="text-white font-bold">{data.num}</span>
-          </div>
-          {data.warning && (
-            <AlertTriangle className="absolute -top-2 -right-2 h-5 w-5 text-yellow-400 animate-pulse" />
-          )}
-        </div>
-      </div>
-
-      {/* 連線狀態 */}
-      <div className="w-32 group-hover:scale-105 transition-transform duration-300">
-        <div className="text-sm text-gray-400">連線狀態</div>
-        <div className="text-white flex items-center gap-2">
-          <span
-            className={`
-            h-2 w-2 rounded-full 
-            ${data.connected ? "bg-green-400" : "bg-gray-400"}
-          `}
-          ></span>
-          {data.connected ? "Connected" : "Disconnected"}
-        </div>
-      </div>
-
-      {/* 設備狀態 */}
-      <div className="w-32 group-hover:scale-105 transition-transform duration-300">
-        <div className="text-sm text-gray-400">設備狀態</div>
-        <div className={`${config.color} flex items-center gap-2`}>
-          <Box className={`h-4 w-4 ${config.iconColor}`} />
-          {config.text}
-        </div>
-      </div>
-
-      {/* 加工數量 */}
-      <div className="w-32 group-hover:scale-105 transition-transform duration-300">
-        <div className="text-sm text-gray-400">加工數量</div>
-        <div className="text-white">{data.workCount}</div>
-      </div>
-
-      {/* 圓環圖區域 */}
-      <div className="w-48 h-32 shrink-0 relative flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-        <div className="absolute inset-0">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={pieData}
-                cx="50%"
-                cy="50%"
-                innerRadius={25}
-                outerRadius={35}
-                startAngle={90}
-                endAngle={-270}
-                dataKey="value"
-                paddingAngle={0}  // 移除間隔
-                animationBegin={0}
-                animationDuration={800}
-                animationEasing="ease-out"
-              >
-                {pieData.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={entry.color} 
-                    strokeWidth={0}
-                  />
-                ))}
-              </Pie>
-              <Tooltip 
-                formatter={(value, name) => [
-                  `${value.toFixed(2)}%`,
-                  name
-                ]}
-                contentStyle={{
-                  backgroundColor: "#1F2937",
-                  border: "1px solid #374151",
-                  borderRadius: "8px",
-                  padding: "8px",
-                }}
-                itemStyle={{ color: "#fff" }}
-                labelStyle={{ color: "#9CA3AF" }}
-                isAnimationActive={true}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-        {/* 中心顯示總稼動率 */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className={`text-sm font-medium ${
-            data.status === "offline" ? "text-gray-400" : "text-green-400"
-          }`}>
-            {parseFloat(data.efficiency || 0).toFixed(2)}%
-          </span>
-        </div>
-      </div>
-
-      {/* 百分比條 */}
-      <div className="w-32 group-hover:scale-105 transition-transform duration-300 flex flex-col justify-center">
-        <div className="text-sm text-gray-400 mb-2"></div>
-        <div className="relative">
-          {/* 背景條 */}
-          <div className="h-2 w-full bg-gray-700/50 rounded-full overflow-hidden backdrop-blur-sm">
-            {/* 進度條 */}
+      {/* 內容區域需要設置 z-index 確保在動畫層上方 */}
+      <div className="relative z-20 flex items-center w-full gap-4">
+        {/* 左側機台資訊 */}
+        <div className="w-48 flex items-center gap-4 pl-3">
+          <div className="relative">
             <div
-              className={`h-full transition-all duration-300 rounded-full
-                ${data.status === "offline" ? "bg-gray-400" : "bg-green-400"}
-                ${data.status === "running" ? "bg-gradient-to-r from-green-400 to-green-500" : ""}
-              `}
-              style={{ width: `${data.efficiency}%` }}
-            />
-          </div>
-          {/* 百分比數值 */}
-          <div className="text-center mt-1.5">
-            <span
-              className={`text-sm font-medium
-              ${data.status === "offline" ? "text-gray-400" : "text-green-400"}
+              className={`
+              bg-gray-800/80 
+              backdrop-blur-sm 
+              p-4 
+              rounded-lg
+              border border-gray-700/50
+              group-hover:scale-105
+              transition-transform duration-300
+              flex items-center gap-2
             `}
             >
-              {data.efficiency}%
+              <Activity className={`h-4 w-4 ${config.iconColor}`} />
+              <span className="text-white font-bold">{data.name}</span>
+            </div>
+            {/* {data.warning && (
+              <AlertTriangle className="absolute -top-2 -right-2 h-5 w-5 text-yellow-400 animate-pulse" />
+            )} */}
+          </div>
+        </div>
+
+        {/* 連線狀態 */}
+        <div className="w-32 group-hover:scale-105 transition-transform duration-300">
+          <div className="text-sm text-gray-400">連線狀態</div>
+          <div className="text-white flex items-center gap-2">
+            <span
+              className={`
+              h-2 w-2 rounded-full 
+              ${data.connected ? "bg-green-400" : "bg-gray-400"}
+            `}
+            ></span>
+            {data.connected ? "Connected" : "Disconnected"}
+          </div>
+        </div>
+
+        {/* 設備狀態 */}
+        <div className="w-32 group-hover:scale-105 transition-transform duration-300">
+          <div className="text-sm text-gray-400">設備狀態</div>
+          <div className={`${config.color} flex items-center gap-2`}>
+            <Box className={`h-4 w-4 ${config.iconColor}`} />
+            {config.text}
+          </div>
+        </div>
+
+        {/* 加工數量 */}
+        <div className="w-32 group-hover:scale-105 transition-transform duration-300">
+          <div className="text-sm text-gray-400">加工數量</div>
+          <div className="text-white">{data.workCount}</div>
+        </div>
+
+        {/* 圓環圖區域 */}
+        <div className="w-48 h-32 shrink-0 relative flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+          <div className="absolute inset-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={25}
+                  outerRadius={35}
+                  startAngle={90}
+                  endAngle={-270}
+                  dataKey="value"
+                  paddingAngle={0}  // 移除間隔
+                  animationBegin={0}
+                  animationDuration={800}
+                  animationEasing="ease-out"
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={entry.color} 
+                      strokeWidth={0}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  formatter={(value, name) => [
+                    `${value.toFixed(2)}%`,
+                    name
+                  ]}
+                  contentStyle={{
+                    backgroundColor: "#1F2937",
+                    border: "1px solid #374151",
+                    borderRadius: "8px",
+                    padding: "8px",
+                  }}
+                  itemStyle={{ color: "#fff" }}
+                  labelStyle={{ color: "#9CA3AF" }}
+                  isAnimationActive={true}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          {/* 中心顯示總稼動率 */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className={`text-sm font-medium ${
+              data.status === "offline" ? "text-gray-400" : "text-green-400"
+            }`}>
+              {parseFloat(data.efficiency || 0).toFixed(2)}%
             </span>
           </div>
         </div>
-      </div>
 
-      {/* 稼動率 */}
-      <div className="w-40 shrink-0 text-right group-hover:scale-105 transition-transform duration-300 ml-auto">
-        <div className="text-sm text-gray-400">稼動率(%)</div>
-        <div
-          className={`text-3xl font-bold truncate ${
-            data.status === "offline" ? "text-gray-400" : "text-green-400"
-          }`}
-        >
-          {data.efficiency}%
+        {/* 百分比條 */}
+        <div className="w-32 group-hover:scale-105 transition-transform duration-300 flex flex-col justify-center">
+          <div className="text-sm text-gray-400 mb-2"></div>
+          <div className="relative">
+            {/* 背景條 */}
+            <div className="h-2 w-full bg-gray-700/50 rounded-full overflow-hidden backdrop-blur-sm">
+              {/* 進度條 */}
+              <div
+                className={`h-full transition-all duration-300 rounded-full
+                  ${data.status === "offline" ? "bg-gray-400" : "bg-green-400"}
+                  ${data.status === "running" ? "bg-gradient-to-r from-green-400 to-green-500" : ""}
+                `}
+                style={{ width: `${data.efficiency}%` }}
+              />
+            </div>
+            {/* 百分比數值 */}
+            <div className="text-center mt-1.5">
+              <span
+                className={`text-sm font-medium
+                ${data.status === "offline" ? "text-gray-400" : "text-green-400"}
+              `}
+              >
+                {data.efficiency}%
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 稼動率 */}
+        <div className="w-40 shrink-0 text-right group-hover:scale-105 transition-transform duration-300 ml-auto">
+          <div className="text-sm text-gray-400">稼動率(%)</div>
+          <div
+            className={`text-3xl font-bold truncate ${
+              data.status === "offline" ? "text-gray-400" : "text-green-400"
+            }`}
+          >
+            {data.efficiency}%
+          </div>
         </div>
       </div>
     </div>
