@@ -1,0 +1,436 @@
+.production-assistant {
+    height: calc(100vh - 40px); /* 設置高度，減去40px以適應頁面布局 */
+    padding: 20px; /* 內邊距 */
+    display: flex; /* 彈性布局 */
+    flex-direction: column; /* 垂直排列子元素 */
+  }
+  
+  /* 聊天界面的容器樣式 */
+  .chat-container {
+    flex: 1; /* 填滿可用空間 */
+    display: flex; /* 彈性布局 */
+    flex-direction: column; /* 垂直排列子元素 */
+    background: #111827; /* 深色背景 */
+    border-radius: 10px; /* 圓角邊框 */
+    border: 1px solid rgba(75, 85, 99, 0.5); /* 邊框顏色透明效果 */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2); /* 投影效果 */
+    max-height: calc(100vh - 80px); /* 設置最大高度 */
+  }
+  
+  /* 聊天界面頂部標題樣式 */
+  .chat-header {
+    display: flex; /* 彈性布局 */
+    align-items: center; /* 垂直居中 */
+    padding: 15px 20px; /* 內邊距 */
+    border-bottom: 1px solid rgba(75, 85, 99, 0.5); /* 下邊框樣式 */
+    background: rgba(17, 24, 39, 0.95); /* 半透明背景 */
+    border-top-left-radius: 10px; /* 左上圓角 */
+    border-top-right-radius: 10px; /* 右上圓角 */
+  }
+  
+  /* 聊天消息區域樣式 */
+  .messages {
+    flex: 1; /* 填滿剩餘空間 */
+    overflow-y: auto; /* 垂直滾動 */
+    padding: 20px; /* 內邊距 */
+  }
+  
+  /* 單條消息容器樣式 */
+  .message {
+    margin-bottom: 6px; /* 每條消息之間的間距 */
+    display: flex; /* 彈性布局 */
+    align-items: flex-start; /* 頂部對齊 */
+    gap: 8px; /* 子元素間距 */
+  }
+  
+  /* 助手頭像樣式 */
+  .assistant-avatar {
+    width: 32px; /* 寬度 */
+    height: 32px; /* 高度 */
+    background: rgba(59, 130, 246, 0.1); /* 輕藍色背景 */
+    border-radius: 8px; /* 圓角 */
+    display: flex; /* 彈性布局 */
+    align-items: center; /* 垂直居中 */
+    justify-content: center; /* 水平居中 */
+    flex-shrink: 0; /* 防止縮小 */
+  }
+  
+  /* 單條消息內容樣式 */
+  .message-content {
+    display: flex; /* 彈性布局 */
+    flex-direction: column; /* 垂直排列 */
+    gap: 6px; /* 元素之間的間距 */
+    max-width: 70%; /* 最大寬度 */
+    padding: 8px 12px; /* 內邊距 */
+    border-radius: 10px; /* 圓角 */
+    background: rgba(55, 65, 81, 0.7); /* 半透明深色背景 */
+    color: #f3f4f6; /* 字體顏色 */
+    border: 1px solid rgba(75, 85, 99, 0.3); /* 邊框樣式 */
+    white-space: pre-line; /* 保留換行 */
+  }
+  
+  /* 用戶消息容器樣式（右對齊） */
+  .message.user {
+    justify-content: flex-end; /* 內容靠右 */
+  }
+  
+  /* 用戶消息內容樣式 */
+  .message.user .message-content {
+    background: rgba(37, 99, 235, 0.75); /* 藍色背景 */
+    color: white; /* 白色文字 */
+    border: none; /* 無邊框 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 輕微投影效果 */
+  }
+  
+  /* 聊天輸入區域的樣式 */
+  .input-form {
+    display: flex; /* 彈性布局 */
+    padding: 15px 20px; /* 內邊距 */
+    gap: 10px; /* 子元素間距 */
+    border-top: 1px solid rgba(75, 85, 99, 0.5); /* 上邊框樣式 */
+    background: rgba(31, 41, 55, 0.95); /* 半透明背景 */
+    border-bottom-left-radius: 10px; /* 左下圓角 */
+    border-bottom-right-radius: 10px; /* 右下圓角 */
+    align-items: center; /* 垂直居中對齊 */
+  }
+  
+  /* 聊天輸入框樣式 */
+  .chat-input {
+    flex: 1; /* 填滿剩餘空間 */
+    padding: 12px; /* 內邊距 */
+    background: rgba(17, 24, 39, 0.95); /* 深色背景 */
+    border: 1px solid rgba(75, 85, 99, 0.5); /* 邊框樣式 */
+    border-radius: 8px; /* 圓角 */
+    font-size: 14px; /* 字體大小 */
+    color: #f3f4f6; /* 字體顏色 */
+    transition: all 0.2s; /* 過渡效果 */
+  }
+  
+  /* 上傳按鈕和發送按鈕的樣式 */
+  .upload-button,
+  .send-button {
+    display: flex; /* 彈性布局 */
+    align-items: center; /* 垂直居中 */
+    justify-content: center; /* 水平居中 */
+    width: 40px; /* 寬度 */
+    height: 40px; /* 高度 */
+    border-radius: 8px; /* 圓角 */
+    background: rgba(37, 99, 235, 0.1); /* 輕藍色背景 */
+    color: #3b82f6; /* 藍色圖標 */
+    border: 1px solid rgba(59, 130, 246, 0.2); /* 邊框樣式 */
+    transition: all 0.2s; /* 過渡效果 */
+    margin-top: 1px; /* 稍微往下調整 */
+  }
+  
+  /* 按鈕懸停效果 */
+  .upload-button:hover,
+  .send-button:hover {
+    background: rgba(37, 99, 235, 0.2); /* 改變背景透明度 */
+    transform: translateY(-1px); /* 提升效果 */
+  }
+  
+  /* 發送按鈕的特定樣式 */
+  .send-button {
+    background: #2563eb; /* 深藍色背景 */
+    color: white; /* 白色文字 */
+    border: none; /* 無邊框 */
+  }
+  
+  /* 發送按鈕懸停效果 */
+  .send-button:hover {
+    background: #1d4ed8; /* 更深的藍色 */
+  }
+  
+  /* 滾動條樣式（WebKit瀏覽器） */
+  .messages::-webkit-scrollbar {
+    width: 6px; /* 滾動條寬度 */
+  }
+  
+  .messages::-webkit-scrollbar-track {
+    background: rgba(31, 41, 55, 0.95); /* 滾動條軌道背景 */
+  }
+  
+  .messages::-webkit-scrollbar-thumb {
+    background: rgba(75, 85, 99, 0.8); /* 滾動條顏色 */
+    border-radius: 3px; /* 滾動條圓角 */
+  }
+  
+  .messages::-webkit-scrollbar-thumb:hover {
+    background: rgba(75, 85, 99, 1); /* 懸停時滾動條顏色 */
+  }
+
+/* 圖表容器樣式 */
+.chart-container {
+    margin-top: 16px; /* 與上方內容的間距 */
+    width: 100%; /* 寬度占滿父容器 */
+    height: 300px; /* 固定高度 */
+    background: rgba(17, 24, 39, 0.7); /* 半透明深色背景 */
+    border-radius: 8px; /* 圓角 */
+    padding: 16px; /* 內邊距 */
+    border: 1px solid rgba(75, 85, 99, 0.3); /* 邊框樣式 */
+  }
+  
+  /* 打字機效果光標樣式 */
+  .typing-cursor {
+    display: inline-block; /* 行內塊顯示 */
+    width: 2px; /* 光標寬度 */
+    height: 1em; /* 光標高度與字體高度一致 */
+    background-color: #f3f4f6; /* 光標顏色 */
+    margin-left: 2px; /* 與文字的間距 */
+    animation: blink 1s infinite; /* 閃爍動畫 */
+  }
+  
+  /* 光標閃爍動畫 */
+  @keyframes blink {
+    0%, 100% { opacity: 1; } /* 可見 */
+    50% { opacity: 0; } /* 不可見 */
+  }
+  
+  /* 禁用狀態的按鈕和輸入框樣式 */
+  .input-form button:disabled,
+  .chat-input:disabled {
+    opacity: 0.5; /* 降低透明度 */
+    cursor: not-allowed; /* 禁用光標樣式 */
+  }
+  
+  /* 禁用發送按鈕的樣式 */
+  .send-button:disabled {
+    background: #2563eb; /* 保持背景顏色 */
+    opacity: 0.7; /* 降低透明度 */
+  }
+  
+  /* 禁用狀態的發送按鈕懸停效果 */
+  .send-button:disabled:hover {
+    transform: none; /* 無位移效果 */
+    background: #2563eb; /* 保持背景顏色 */
+  }
+  
+  /* 移除原有的 loading 樣式 */
+  .loading,
+  .loading-spinner,
+  .spinner-icon,
+  .loading-text {
+    display: none; /* 隱藏原本的加載效果 */
+  }
+  
+  /* 點點加載動畫樣式 */
+  .dots-loading {
+    display: flex; /* 彈性布局 */
+    align-items: center; /* 垂直居中 */
+    gap: 3px; /* 點之間的間距 */
+  }
+  
+  .dots-loading div {
+    width: 4px; /* 點的寬度 */
+    height: 4px; /* 點的高度 */
+    background: white; /* 點的顏色 */
+    border-radius: 50%; /* 圓形 */
+    animation: dots-bounce 0.5s infinite alternate; /* 上下跳動動畫 */
+  }
+  
+  /* 點動畫的延遲設置 */
+  .dots-loading div:nth-child(2) {
+    animation-delay: 0.2s; /* 第二個點延遲0.2秒 */
+  }
+  
+  .dots-loading div:nth-child(3) {
+    animation-delay: 0.4s; /* 第三個點延遲0.4秒 */
+  }
+  
+  /* 點的跳動動畫 */
+  @keyframes dots-bounce {
+    0% {
+      transform: translateY(0); /* 起始位置 */
+    }
+    100% {
+      transform: translateY(-4px); /* 向上跳動4px */
+    }
+  }
+  
+  /* 選擇的圖片容器樣式 */
+  .selected-image-container {
+    position: relative; /* 相對定位，便於內部絕對定位的元素 */
+    padding: 4px 8px; /* 內邊距 */
+    border-top: 1px solid rgba(75, 85, 99, 0.5); /* 上邊框 */
+    background: rgba(31, 41, 55, 0.95); /* 深色背景 */
+    display: flex; /* 彈性布局 */
+    align-items: center; /* 垂直居中 */
+    height: 50px; /* 固定高度 */
+  }
+  
+  /* 選擇的圖片樣式 */
+  .selected-image-container img {
+    max-height: 40px; /* 最大高度 */
+    max-width: 80px; /* 最大寬��� */
+    border-radius: 4px; /* 圓角 */
+    cursor: pointer; /* 鼠標指針樣式 */
+    object-fit: contain; /* 圖片內容適配容器 */
+    transition: all 0.3s ease; /* 過渡效果 */
+  }
+  
+  /* 移除圖片按鈕樣式 */
+  .remove-image {
+    position: absolute; /* 絕對定位 */
+    top: 5px; /* 距離頂部5px */
+    right: 25px; /* 距離右側25px */
+    background: rgba(0, 0, 0, 0.5); /* 半透明黑色背景 */
+    color: white; /* 白色文字 */
+    border: none; /* 無邊框 */
+    border-radius: 50%; /* 圓形 */
+    width: 20px; /* 按鈕寬度 */
+    height: 20px; /* 按鈕高度 */
+    display: flex; /* 彈性布局 */
+    align-items: center; /* 垂直居中 */
+    justify-content: center; /* 水平居中 */
+    cursor: pointer; /* 鼠標指針樣式 */
+    font-size: 12px; /* 字體大小 */
+  }
+  
+  /* 單條消息圖片樣式 */
+  .message-image {
+    position: relative; /* 相對定位 */
+    margin: 0; /* 無外邊距 */
+    width: fit-content; /* 自適應寬度 */
+  }
+  
+  /* 單條消息圖片的展示樣式 */
+  .message-image img {
+    max-width: 200px; /* 圖片最大寬度 */
+    max-height: 150px; /* 圖片最大高度 */
+    border-radius: 8px; /* 圓角 */
+    cursor: pointer; /* 鼠標指針樣式 */
+    display: block; /* 行內塊顯示 */
+    transition: all 0.3s ease; /* 過渡效果 */
+  }
+  
+  /* 單條消息圖片的提示樣式 */
+  .message-image::after {
+    content: '點擊查看'; /* 提示文字 */
+    position: absolute; /* 絕對定位 */
+    bottom: 8px; /* 距離底部8px */
+    left: 50%; /* 水平居中 */
+    transform: translateX(-50%); /* 修正位置偏移 */
+    background: rgba(0, 0, 0, 0.75); /* 半透明黑色背景 */
+    color: white; /* 白色文字 */
+    padding: 4px 8px; /* 內邊距 */
+    border-radius: 4px; /* 圓角 */
+    font-size: 12px; /* 字體大小 */
+    opacity: 0; /* 默認不可見 */
+    transition: opacity 0.2s ease; /* 過渡效果 */
+    pointer-events: none; /* 禁止鼠標事件 */
+  }
+  
+  /* 懸停時圖片的樣式變化 */
+  .message-image:hover img {
+    transform: scale(1.02); /* 放大效果 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* 添加陰影 */
+  }
+  
+  /* 懸停時顯示提示文字 */
+  .message-image:hover::after {
+    opacity: 1; /* 顯示提示文字 */
+  }
+  
+  /* 圖片放大顯示的模態框樣式 */
+  .image-modal-overlay {
+    position: fixed; /* 固定定位 */
+    top: 0; /* 占滿整個屏幕 */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8); /* 半透明黑色背景 */
+    display: flex; /* 彈性布局 */
+    justify-content: center; /* 水平居中 */
+    align-items: center; /* 垂直居中 */
+    z-index: 1000; /* 高層級 */
+    cursor: pointer; /* 鼠標指針樣式 */
+  }
+  
+  /* 圖片放大內容樣式 */
+  .image-modal-content {
+    max-width: 90vw; /* 最大寬度 */
+    max-height: 90vh; /* 最大高度 */
+  }
+  
+  /* 圖片放大的樣式 */
+  .image-modal-content img {
+    max-width: 100%; /* 圖片自適應容器寬度 */
+    max-height: 90vh; /* 圖片最大高度 */
+    object-fit: contain; /* 圖片內容適配容器 */
+    border-radius: 8px; /* 圓角 */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 輕微陰影 */
+    transition: transform 0.3s ease; /* 過渡效果 */
+  }
+  
+  /* 預覽圖片容器樣式 */
+  .selected-images-container {
+    position: relative; /* 相對定位 */
+    padding: 8px 12px; /* 內邊距 */
+    border-top: 1px solid rgba(75, 85, 99, 0.5); /* 上邊框 */
+    background: rgba(31, 41, 55, 0.95); /* 深色背景 */
+  }
+  
+  /* 預覽圖片列表樣式 */
+  .images-preview {
+    display: flex; /* 彈性布局 */
+    gap: 8px; /* 子元素間距 */
+    flex-wrap: wrap; /* 自動換行 */
+    align-items: center; /* 垂直居中 */
+    min-height: 50px; /* 最小高度 */
+  }
+  
+  /* 單個預覽圖片容器樣式 */
+  .image-preview-item {
+    position: relative; /* 相對定位 */
+    height: 40px; /* 固定高度 */
+    border-radius: 4px; /* 圓角 */
+    overflow: hidden; /* 隱藏溢出部分 */
+  }
+  
+  /* 預覽圖片的樣式 */
+  .image-preview-item img {
+    height: 100%; /* 高度占滿容器 */
+    width: auto; /* 自適應寬度 */
+    object-fit: cover; /* 圖片內容適配容器 */
+    border-radius: 4px; /* 圓角 */
+    cursor: pointer; /* 鼠標指針樣式 */
+    transition: all 0.2s ease; /* 過渡效果 */
+  }
+  
+  /* 懸停時圖片樣式變化 */
+  .image-preview-item:hover img {
+    transform: scale(1.05); /* 放大效果 */
+    filter: brightness(1.1); /* 增加亮度 */
+  }
+  
+  /* 預覽圖片刪除按鈕樣式 */
+  .image-preview-item .remove-image {
+    position: absolute; /* 絕對定位 */
+    top: 2px; /* 距離頂部2px */
+    right: 2px; /* 距離右側2px */
+    background: rgba(0, 0, 0, 0.6); /* 半透明黑色背景 */
+    color: white; /* 白色文字 */
+    border: none; /* 無邊框 */
+    border-radius: 50%; /* 圓形 */
+    width: 16px; /* 按鈕寬度 */
+    height: 16px; /* 按鈕高度 */
+    display: flex; /* 彈性布局 */
+    align-items: center; /* 垂直居中 */
+    justify-content: center; /* 水平居中 */
+    cursor: pointer; /* 鼠標指針樣式 */
+    font-size: 10px; /* 字體大小 */
+    opacity: 0; /* 默認不可見 */
+    transition: opacity 0.2s ease; /* 過渡效果 */
+  }
+  
+  /* 懸停時刪除按鈕的樣式 */
+  .image-preview-item:hover .remove-image {
+    opacity: 1; /* 顯示按鈕 */
+  }
+  
+  /* 懸停時刪除按鈕樣式變化 */
+  .remove-image:hover {
+    background: rgba(0, 0, 0, 0.8); /* 加深背景顏色 */
+    transform: scale(1.1); /* 按鈕放大 */
+  }
+  

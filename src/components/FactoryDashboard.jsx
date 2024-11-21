@@ -10,6 +10,7 @@ import {
   BarChart,
   Settings,
   LogOut,
+  Bot,
 } from "lucide-react";
 import { SideNavItem } from "./dashboard/SideNavItem";
 import { MachineList } from "./dashboard/MachineList";
@@ -20,6 +21,7 @@ import { ProductionHistory } from "./dashboard/ProductionHistory";
 import { Statistics } from "./dashboard/Statistics";
 import { SystemSettings } from "./dashboard/SystemSettings";
 import { getStatusSummary } from "../data/mockData";
+import ProductionAssistant from './ProductionAssistant';
 
 const FactoryDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -49,6 +51,8 @@ const FactoryDashboard = () => {
         return <ProductionHistory />;
       case "stats":
         return <Statistics />;
+      case "assistant":
+        return <ProductionAssistant />;
       case "settings":
         return <SystemSettings />;
       default:
@@ -111,6 +115,12 @@ const FactoryDashboard = () => {
             text="統計分析"
             active={activeTab === "stats"}
             onClick={() => setActiveTab("stats")}
+          />
+          <SideNavItem
+            icon={Bot}
+            text="產線智能助手"
+            active={activeTab === "assistant"}
+            onClick={() => setActiveTab("assistant")}
           />
           <SideNavItem
             icon={Settings}

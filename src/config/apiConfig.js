@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  baseUrl: 'http://192.168.0.40:7117',
+  baseUrl: 'http://192.168.1.185:7117',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
