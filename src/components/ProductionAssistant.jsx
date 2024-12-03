@@ -147,12 +147,11 @@ const ProductionAssistant = () => {
   // 修改提交處理函數
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // 檢查是否有輸入內容且不在打字過程中
     if ((!input.trim() && selectedImages.length === 0) || isTyping) return;
 
     const currentMessages = [...messages];
 
-    // 如果有文字輸入，創建用戶消息��象
+    // 添加文字消息
     if (input.trim()) {
       const textMessage = {
         role: "user",
@@ -162,21 +161,34 @@ const ProductionAssistant = () => {
       currentMessages.push(textMessage);
     }
 
-    // 更新消息列表並清空輸入框
+    // 添加圖片消息到UI顯示
+    selectedImages.forEach((image) => {
+      const imageMessage = {
+        role: "user",
+        content: "圖片",
+        displayContent: "圖片",
+        image: image.url
+      };
+      currentMessages.push(imageMessage);
+    });
+
+    // 更新消息列表並清空輸入
     setMessages(currentMessages);
     setInput("");
-    setIsLoading(true); // 開始加載動畫
+    setSelectedImages([]); // 清空已選擇的圖片
+    setIsLoading(true);
 
     try {
-      // 發送 POST 請求到代理的 API 端點
+      // 維持原有的 JSON 格式
       const response = await fetch("/api/conversation", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json", // 設置請求內容類型為 JSON
-          Accept: "application/json", // 設置接受的響應類型為 JSON
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify({
-          query: input, // 將用戶輸入轉換為 JSON 格式
+          query: input,
+          images: selectedImages.map(img => img.url) // 可選：如果後端需要處理圖片
         }),
       });
 
@@ -196,7 +208,7 @@ const ProductionAssistant = () => {
         displayContent: "",
       };
 
-      // 更新消息列表並啟動打字機效���
+      // 更新消息列表並啟動打字機效
       setMessages([...currentMessages, assistantMessage]);
       await typeWriter(assistantMessage.content, currentMessages.length, [
         ...currentMessages,
