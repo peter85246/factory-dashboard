@@ -41,19 +41,21 @@ const ProductionAssistant = () => {
   const fileInputRef = useRef(null); // 新增檔案輸入參考
   const [enlargedImage, setEnlargedImage] = useState(null);
 
-  // 添加 ResizeObserver 警告處理
+  // 修改 ResizeObserver 警告處理
   useEffect(() => {
-    const resizeObserverError = window.addEventListener("error", (e) => {
-      if (
-        e.message ===
-        "ResizeObserver loop completed with undelivered notifications."
-      ) {
-        e.stopImmediatePropagation();
+    // 創建一個自定義的 ResizeObserver 錯誤處理器
+    const resizeObserverLoopErrRe = /^[^(ResizeObserver loop limit exceeded)]/;
+    const originalConsoleError = window.console.error;
+    window.console.error = (...args) => {
+      if (args.length > 0 && typeof args[0] === 'string' && resizeObserverLoopErrRe.test(args[0])) {
+        return;
       }
-    });
+      originalConsoleError.apply(window.console, args);
+    };
 
+    // 返回清理函數
     return () => {
-      window.removeEventListener("error", resizeObserverError);
+      window.console.error = originalConsoleError;
     };
   }, []);
 
@@ -151,7 +153,6 @@ const ProductionAssistant = () => {
 
     const currentMessages = [...messages];
 
-    // 添加文字消息
     if (input.trim()) {
       const textMessage = {
         role: "user",
@@ -161,25 +162,11 @@ const ProductionAssistant = () => {
       currentMessages.push(textMessage);
     }
 
-    // 添加圖片消息到UI顯示
-    selectedImages.forEach((image) => {
-      const imageMessage = {
-        role: "user",
-        content: "圖片",
-        displayContent: "圖片",
-        image: image.url
-      };
-      currentMessages.push(imageMessage);
-    });
-
-    // 更新消息列表並清空輸入
     setMessages(currentMessages);
     setInput("");
-    setSelectedImages([]); // 清空已選擇的圖片
     setIsLoading(true);
 
     try {
-      // 維持原有的 JSON 格式
       const response = await fetch("/api/conversation", {
         method: "POST",
         headers: {
@@ -188,27 +175,32 @@ const ProductionAssistant = () => {
         },
         body: JSON.stringify({
           query: input,
-          images: selectedImages.map(img => img.url) // 可選：如果後端需要處理圖片
         }),
       });
 
-      // 檢查響應狀態
       if (!response.ok) {
         throw new Error(`伺服器回應錯誤: ${response.status}`);
       }
 
-      // 解析響應數據
       const data = await response.json();
-      console.log("Response data:", data); // 輸出響應數據以便調試
+      console.log("Response data:", data);
 
-      // 創建助手回應消息對象
+      // 解析回應數據
+      let responseData;
+      try {
+        responseData = typeof data.output === 'string' ? JSON.parse(data.output) : data.output;
+      } catch (e) {
+        responseData = { output: data.output };
+      }
+
+      // 創建助手回應消息對象，包含圖表數據
       const assistantMessage = {
         role: "assistant",
-        content: data.output || "抱歉，我暫時無法處理您的請求。",
+        content: responseData.output,
         displayContent: "",
+        charts: responseData.charts // 添加圖表數據
       };
 
-      // 更新消息列表並啟動打字機效
       setMessages([...currentMessages, assistantMessage]);
       await typeWriter(assistantMessage.content, currentMessages.length, [
         ...currentMessages,
