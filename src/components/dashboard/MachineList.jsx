@@ -4,8 +4,8 @@
 import React, { useEffect, useState } from "react";
 import { AlertTriangle, Activity, Box } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { factoryApi } from '../../services/factoryApi';
-import { StatusBar } from './StatusBar';  // 添加這行
+import { factoryApi } from "../../services/factoryApi";
+import { StatusBar } from "./StatusBar"; // 添加這行
 
 export const MachineList = () => {
   const [devices, setDevices] = useState([]);
@@ -14,11 +14,11 @@ export const MachineList = () => {
     idle: 0,
     running: 0,
     offline: 0,
-    averageEfficiency: 0
+    averageEfficiency: 0,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [updateStatus, setUpdateStatus] = useState('');
+  const [updateStatus, setUpdateStatus] = useState("");
 
   useEffect(() => {
     const fetchDevices = async () => {
@@ -26,16 +26,16 @@ export const MachineList = () => {
         setLoading(true);
         setError(null);
         const { devices, summary } = await factoryApi.device.getAllDevices();
-        
+
         if (!devices || !summary) {
-          throw new Error('無法取得設備資料');
+          throw new Error("無法取得設備資料");
         }
-        
+
         setDevices(devices);
         setSummary(summary);
       } catch (err) {
-        setError('資料更新失敗: ' + err.message);
-        console.error('資料更新錯誤:', err);
+        setError("資料更新失敗: " + err.message);
+        console.error("資料更新錯誤:", err);
       } finally {
         setTimeout(() => {
           setLoading(false);
@@ -50,17 +50,15 @@ export const MachineList = () => {
 
   return (
     <div className="space-y-6">
-      <StatusBar 
-        summary={summary} 
-        devices={devices} 
-        loading={loading} 
-      />
+      <StatusBar summary={summary} devices={devices} loading={loading} />
       {/* 頂部狀態列 */}
       <div className="bg-[#0B1015] p-4">
         <div className="flex justify-between items-center mb-4">
           <div>
             <span className="text-gray-400">平均稼動率(%)</span>
-            <div className="text-xl text-white">{summary.averageEfficiency}%</div>
+            <div className="text-xl text-white">
+              {summary.averageEfficiency}%
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <StatusBox label="異常" count={summary.error} color="red" />
@@ -110,7 +108,7 @@ const StatusBox = ({ label, count, color }) => {
 };
 
 const MachineStatusRow = ({ data }) => {
-  console.log('Current machine status:', data.status);
+  console.log("Current machine status:", data.status);
 
   const statusConfig = {
     running: {
@@ -154,18 +152,18 @@ const MachineStatusRow = ({ data }) => {
   const config = statusConfig[data.status] || statusConfig.offline;
 
   const pieData = [
-    { 
-      name: "進度", 
-      value: parseFloat(data.efficiency || 0), 
-      color: "#F97316",  // 橘色，表示進度
-      label: `進度 ${parseFloat(data.efficiency || 0).toFixed(2)}%`
+    {
+      name: "進度",
+      value: parseFloat(data.efficiency || 0),
+      color: "#F97316", // 橘色，表示進度
+      label: `進度 ${parseFloat(data.efficiency || 0).toFixed(2)}%`,
     },
-    { 
-      name: "背景", 
-      value: 100 - parseFloat(data.efficiency || 0), 
-      color: "#10B981",  // 綠色，作為背景
-      label: `剩餘 ${(100 - parseFloat(data.efficiency || 0)).toFixed(2)}%`
-    }
+    {
+      name: "背景",
+      value: 100 - parseFloat(data.efficiency || 0),
+      color: "#10B981", // 綠色，作為背景
+      label: `剩餘 ${(100 - parseFloat(data.efficiency || 0)).toFixed(2)}%`,
+    },
   ];
 
   return (
@@ -187,7 +185,8 @@ const MachineStatusRow = ({ data }) => {
       `}
     >
       {/* 調整光暈效果透明度 */}
-      <div className={`
+      <div
+        className={`
         absolute inset-0 
         bg-gradient-to-r 
         ${data.status === "running" ? "from-green-500/0 via-green-500/20 to-green-500/0" : ""}
@@ -195,7 +194,8 @@ const MachineStatusRow = ({ data }) => {
         ${data.status === "error" ? "from-red-500/0 via-red-500/20 to-red-500/0" : ""}
         ${data.status === "offline" ? "from-gray-500/0 via-gray-500/20 to-gray-500/0" : ""}
         animate-shimmer
-      `} />
+      `}
+      />
 
       {/* 左側狀態指示條 */}
       <div
@@ -278,24 +278,21 @@ const MachineStatusRow = ({ data }) => {
                   startAngle={90}
                   endAngle={-270}
                   dataKey="value"
-                  paddingAngle={0}  // 移除間隔
+                  paddingAngle={0} // 移除間隔
                   animationBegin={0}
                   animationDuration={800}
                   animationEasing="ease-out"
                 >
                   {pieData.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={entry.color} 
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.color}
                       strokeWidth={0}
                     />
                   ))}
                 </Pie>
-                <Tooltip 
-                  formatter={(value, name) => [
-                    `${value.toFixed(2)}%`,
-                    name
-                  ]}
+                <Tooltip
+                  formatter={(value, name) => [`${value.toFixed(2)}%`, name]}
                   contentStyle={{
                     backgroundColor: "#1F2937",
                     border: "1px solid #374151",
@@ -311,9 +308,11 @@ const MachineStatusRow = ({ data }) => {
           </div>
           {/* 中心顯示總稼動率 */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className={`text-sm font-medium ${
-              data.status === "offline" ? "text-gray-400" : "text-green-400"
-            }`}>
+            <span
+              className={`text-sm font-medium ${
+                data.status === "offline" ? "text-gray-400" : "text-green-400"
+              }`}
+            >
               {parseFloat(data.efficiency || 0).toFixed(2)}%
             </span>
           </div>

@@ -21,7 +21,7 @@ import { ProductionHistory } from "./dashboard/ProductionHistory";
 import { Statistics } from "./dashboard/Statistics";
 import { SystemSettings } from "./dashboard/SystemSettings";
 import { getStatusSummary } from "../data/mockData";
-import ProductionAssistant from './ProductionAssistant';
+import ProductionAssistant from "./ProductionAssistant";
 
 const FactoryDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");

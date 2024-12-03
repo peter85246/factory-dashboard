@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { factoryApi } from '../../services/factoryApi';  // 確保這個路徑正確
-import { StatusBar } from './StatusBar';  // 修正 import 路徑
+import { factoryApi } from "../../services/factoryApi"; // 確保這個路徑正確
+import { StatusBar } from "./StatusBar"; // 修正 import 路徑
 
 export const Dashboard = () => {
   const [devices, setDevices] = useState([]);
@@ -9,7 +9,7 @@ export const Dashboard = () => {
     idle: 0,
     error: 0,
     offline: 0,
-    averageEfficiency: 0
+    averageEfficiency: 0,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -19,9 +19,9 @@ export const Dashboard = () => {
       try {
         setLoading(true);
         const { devices, summary } = await factoryApi.device.getAllDevices();
-        
+
         if (!devices || !summary) {
-          throw new Error('無法取得設備資料');
+          throw new Error("無法取得設備資料");
         }
 
         // 添加數據轉換
@@ -30,20 +30,19 @@ export const Dashboard = () => {
           idle: Number(summary.idle) || 0,
           error: Number(summary.error) || 0,
           offline: Number(summary.offline) || 0,
-          averageEfficiency: Number(summary.averageEfficiency).toFixed(4)
+          averageEfficiency: Number(summary.averageEfficiency).toFixed(4),
         };
 
         setDevices(devices);
         setSummary(processedSummary);
 
-        console.log('Dashboard Data:', {
+        console.log("Dashboard Data:", {
           devices,
-          summary: processedSummary
+          summary: processedSummary,
         });
-
       } catch (err) {
-        setError('資料更新失敗: ' + err.message);
-        console.error('資料更新錯誤:', err);
+        setError("資料更新失敗: " + err.message);
+        console.error("資料更新錯誤:", err);
       } finally {
         setLoading(false);
       }
@@ -65,12 +64,8 @@ export const Dashboard = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <StatusBar 
-        summary={summary}
-        devices={devices}
-        loading={loading}
-      />
-      
+      <StatusBar summary={summary} devices={devices} loading={loading} />
+
       {/* 狀態卡片網格 */}
       <div className="grid grid-cols-5 gap-4">
         {/* 總機台數 */}

@@ -12,19 +12,19 @@ export const MachineStatus = ({ data }) => {
   useEffect(() => {
     animate(errorCount, data.percentage.error, {
       duration: 1.5,
-      ease: "easeOut"
+      ease: "easeOut",
     });
     animate(idleCount, data.percentage.idle, {
       duration: 1.5,
-      ease: "easeOut"
+      ease: "easeOut",
     });
     animate(runningCount, data.percentage.running, {
       duration: 1.5,
-      ease: "easeOut"
+      ease: "easeOut",
     });
     animate(offlineCount, data.percentage.offline, {
       duration: 1.5,
-      ease: "easeOut"
+      ease: "easeOut",
     });
   }, [data]);
 

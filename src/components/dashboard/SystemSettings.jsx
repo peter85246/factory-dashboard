@@ -2,21 +2,17 @@
  * UI頁面：系統設定
  * 功能：系統參數配置和設定
  */
-import React, { useState } from "react";  // 修改這行
+import React, { useState } from "react"; // 修改這行
 import { Card } from "../ui/card";
-import { StatusBar } from './StatusBar';  // 添加這行
-import { useStatusData } from '../../hooks/useStatusData';
+import { StatusBar } from "./StatusBar"; // 添加這行
+import { useStatusData } from "../../hooks/useStatusData";
 
 export const SystemSettings = () => {
   const { summary, devices, loading } = useStatusData();
 
   return (
     <div className="space-y-6">
-      <StatusBar 
-        summary={summary} 
-        devices={devices} 
-        loading={loading} 
-      />
+      <StatusBar summary={summary} devices={devices} loading={loading} />
       <Card className="p-6 bg-gray-900 text-white">
         <h3 className="text-lg font-semibold mb-4">系統設定</h3>
         <div className="space-y-4">

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { factoryApi } from '../services/factoryApi';
+import { useState, useEffect } from "react";
+import { factoryApi } from "../services/factoryApi";
 
 /**
  * 設備狀態數據 Hook
@@ -12,7 +12,7 @@ export const useStatusData = () => {
     idle: 0,
     running: 0,
     offline: 0,
-    averageEfficiency: 0
+    averageEfficiency: 0,
   });
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,9 +29,9 @@ export const useStatusData = () => {
     const fetchData = async () => {
       try {
         const response = await factoryApi.device.getAllDevices();
-        
+
         if (!response.devices || !response.summary) {
-          throw new Error('無法取得設備資料');
+          throw new Error("無法取得設備資料");
         }
 
         if (isMounted) {
@@ -43,7 +43,7 @@ export const useStatusData = () => {
       } catch (err) {
         if (isMounted) {
           setError(err.message);
-          console.error('Error fetching data:', err);
+          console.error("Error fetching data:", err);
           setLoading(false);
         }
       }
@@ -68,4 +68,4 @@ export const useStatusData = () => {
   }, []);
 
   return { summary, devices, loading, error };
-}; 
+};

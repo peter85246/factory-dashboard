@@ -4,12 +4,16 @@
 export const transformDeviceData = (deviceData) => {
   // 狀態映射
   const getStatus = (status, connected) => {
-    if (connected !== "1") return 'offline';
+    if (connected !== "1") return "offline";
     switch (status?.toUpperCase()) {
-      case 'RUN': return 'running';
-      case 'IDLE': return 'idle';
-      case 'ALARM': return 'error';
-      default: return 'offline';
+      case "RUN":
+        return "running";
+      case "IDLE":
+        return "idle";
+      case "ALARM":
+        return "error";
+      default:
+        return "offline";
     }
   };
 
@@ -32,7 +36,7 @@ export const transformDeviceData = (deviceData) => {
     toolCode: deviceData.TCode,
     spindleLoad: parseFloat(deviceData.SpindleLoad) || 0,
     spindleSpeed: parseInt(deviceData.SpindleSpeed) || 0,
-    feedRate: parseInt(deviceData.Feedrate) || 0
+    feedRate: parseInt(deviceData.Feedrate) || 0,
   };
 };
 
@@ -43,10 +47,10 @@ export const calculateStatusSummary = (devices) => {
     running: 0,
     offline: 0,
     totalEfficiency: 0,
-    connectedCount: 0
+    connectedCount: 0,
   };
 
-  devices.forEach(device => {
+  devices.forEach((device) => {
     summary[device.status]++;
     if (device.connected) {
       summary.connectedCount++;
@@ -54,8 +58,9 @@ export const calculateStatusSummary = (devices) => {
     }
   });
 
-  summary.averageEfficiency = summary.connectedCount ? 
-    (summary.totalEfficiency / summary.connectedCount).toFixed(2) : 0;
+  summary.averageEfficiency = summary.connectedCount
+    ? (summary.totalEfficiency / summary.connectedCount).toFixed(2)
+    : 0;
 
   return summary;
-}; 
+};
