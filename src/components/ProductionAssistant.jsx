@@ -3,6 +3,7 @@
  */
 import React, { useState, useRef, useEffect } from "react";
 import { Bot, Send, Image as ImageIcon, Loader } from "lucide-react"; // 引入需要的圖標
+import { ErrorBoundary } from "react-error-boundary"; // 添加這行
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -31,6 +32,83 @@ ChartJS.register(
   BarElement,
 );
 
+// 添加 ErrorFallback 組件
+const ErrorFallback = ({ error }) => {
+  return null;
+};
+
+// 修改 ChartWrapper 組件
+const ChartWrapper = ({ type, data }) => {
+  const [isReady, setIsReady] = useState(false);
+  const chartRef = useRef(null);
+
+  useEffect(() => {
+    // 延遲渲染圖表
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 300);
+
+    return () => {
+      clearTimeout(timer);
+      if (chartRef.current) {
+        chartRef.current.destroy();
+      }
+    };
+  }, [data]);
+
+  const commonOptions = {
+    animation: false,
+    responsive: true,
+    maintainAspectRatio: false,
+    resizeDelay: 200,
+    onResize: () => {}, // 空函數來防止 resize 事件
+    plugins: {
+      legend: {
+        position: "bottom",
+        labels: {
+          color: "#f3f4f6",
+        },
+      },
+    },
+    scales:
+      type === "bar"
+        ? {
+            y: {
+              ticks: { color: "#f3f4f6" },
+              grid: { color: "rgba(75, 85, 99, 0.3)" },
+            },
+            x: {
+              ticks: { color: "#f3f4f6" },
+              grid: { color: "rgba(75, 85, 99, 0.3)" },
+            },
+          }
+        : undefined,
+  };
+
+  return (
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <div
+        style={{
+          position: "relative",
+          height: "300px",
+          width: "100%",
+          overflow: "hidden",
+        }}
+      >
+        {isReady && (
+          <Chart
+            ref={chartRef}
+            type={type}
+            data={data}
+            options={commonOptions}
+            redraw={false}
+          />
+        )}
+      </div>
+    </ErrorBoundary>
+  );
+};
+
 const ProductionAssistant = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -41,21 +119,53 @@ const ProductionAssistant = () => {
   const fileInputRef = useRef(null); // 新增檔案輸入參考
   const [enlargedImage, setEnlargedImage] = useState(null);
 
-  // 修改 ResizeObserver 警告處理
   useEffect(() => {
-    // 創建一個自定義的 ResizeObserver 錯誤處理器
-    const resizeObserverLoopErrRe = /^[^(ResizeObserver loop limit exceeded)]/;
-    const originalConsoleError = window.console.error;
-    window.console.error = (...args) => {
-      if (args.length > 0 && typeof args[0] === 'string' && resizeObserverLoopErrRe.test(args[0])) {
+    // 處理 console.error
+    const originalConsoleError = console.error;
+    const ignoreMessages = [
+      "ResizeObserver loop completed with undelivered notifications.",
+      "ResizeObserver loop limit exceeded",
+    ];
+
+    console.error = (...args) => {
+      if (
+        args.length > 0 &&
+        typeof args[0] === "string" &&
+        ignoreMessages.some((msg) => args[0].includes(msg))
+      ) {
         return;
       }
-      originalConsoleError.apply(window.console, args);
+      originalConsoleError.apply(console, args);
     };
 
-    // 返回清理函數
+    // 處理 window error
+    const handleWindowError = (event) => {
+      if (ignoreMessages.some((msg) => event.message?.includes(msg))) {
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+      }
+    };
+
+    // 處理 unhandledrejection
+    const handleUnhandledRejection = (event) => {
+      if (ignoreMessages.some((msg) => event.reason?.message?.includes(msg))) {
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+      }
+    };
+
+    window.addEventListener("error", handleWindowError, true);
+    window.addEventListener("unhandledrejection", handleUnhandledRejection);
+
     return () => {
-      window.console.error = originalConsoleError;
+      console.error = originalConsoleError;
+      window.removeEventListener("error", handleWindowError, true);
+      window.removeEventListener(
+        "unhandledrejection",
+        handleUnhandledRejection,
+      );
     };
   }, []);
 
@@ -188,7 +298,10 @@ const ProductionAssistant = () => {
       // 解析回應數據
       let responseData;
       try {
-        responseData = typeof data.output === 'string' ? JSON.parse(data.output) : data.output;
+        responseData =
+          typeof data.output === "string"
+            ? JSON.parse(data.output)
+            : data.output;
       } catch (e) {
         responseData = { output: data.output };
       }
@@ -198,7 +311,7 @@ const ProductionAssistant = () => {
         role: "assistant",
         content: responseData.output,
         displayContent: "",
-        charts: responseData.charts // 添加圖表數據
+        charts: responseData.charts, // 添加圖表數據
       };
 
       setMessages([...currentMessages, assistantMessage]);
@@ -269,49 +382,10 @@ const ProductionAssistant = () => {
                     {message.charts &&
                       message.displayContent === message.content && (
                         <div className="chart-container">
-                          {message.charts.type === "pie" && (
-                            <Chart
-                              type="pie"
-                              data={message.charts.data}
-                              options={{
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                  legend: {
-                                    position: "bottom",
-                                    labels: {
-                                      color: "#f3f4f6", // 淺色文字
-                                    },
-                                  },
-                                },
-                              }}
-                            />
-                          )}
-                          {message.charts.type === "bar" && (
-                            <Chart
-                              type="bar"
-                              data={message.charts.data}
-                              options={{
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: {
-                                  y: {
-                                    ticks: { color: "#f3f4f6" },
-                                    grid: { color: "rgba(75, 85, 99, 0.3)" },
-                                  },
-                                  x: {
-                                    ticks: { color: "#f3f4f6" },
-                                    grid: { color: "rgba(75, 85, 99, 0.3)" },
-                                  },
-                                },
-                                plugins: {
-                                  legend: {
-                                    labels: { color: "#f3f4f6" },
-                                  },
-                                },
-                              }}
-                            />
-                          )}
+                          <ChartWrapper
+                            type={message.charts.type}
+                            data={message.charts.data}
+                          />
                         </div>
                       )}
                   </div>

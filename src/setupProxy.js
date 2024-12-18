@@ -1,4 +1,4 @@
-// 產線助手GPT，使用代理中間件解決 CORS 問題
+// 產線助手GPT，使用代理中間件解決 CORS 問題 (產線智能助手API接口)
 
 // 引入 http-proxy-middleware 中的代理中間件創建函數
 const { createProxyMiddleware } = require("http-proxy-middleware");
