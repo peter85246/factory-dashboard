@@ -25,6 +25,26 @@ module.exports = function (app) {
     }),
   );
 
+  // 訂單助手的代理配置
+  app.use(
+    "/api/order-assistant",
+    createProxyMiddleware({
+      target: "http://120.113.124.106:10011", // 訂單助手的API端點
+      changeOrigin: true,
+      pathRewrite: {
+        "^/api/order-assistant": "/order", // 重寫路徑
+      },
+      onProxyRes: function (proxyRes, req, res) {
+        proxyRes.headers["Access-Control-Allow-Origin"] = "*";
+        proxyRes.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS";
+        proxyRes.headers["Access-Control-Allow-Headers"] = "Content-Type";
+      },
+      onError: (err, req, res) => {
+        console.error("Order Assistant Proxy Error:", err);
+      },
+    })
+  );
+
   // 日誌分析的代理
   // app.use(
   //   "/api/log-analysis",
