@@ -11,6 +11,7 @@ import {
   Settings,
   LogOut,
   Bot,
+  FileText,
 } from "lucide-react";
 import { SideNavItem } from "./dashboard/SideNavItem";
 import { MachineList } from "./dashboard/MachineList";
@@ -22,6 +23,7 @@ import { Statistics } from "./dashboard/Statistics";
 import { SystemSettings } from "./dashboard/SystemSettings";
 import { getStatusSummary } from "../data/mockData";
 import ProductionAssistant from "./ProductionAssistant";
+import LogAnalysis from "./LogAnalysis";
 
 const FactoryDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -53,6 +55,8 @@ const FactoryDashboard = () => {
         return <Statistics />;
       case "assistant":
         return <ProductionAssistant />;
+      case "log-analysis":
+        return <LogAnalysis />;
       case "settings":
         return <SystemSettings />;
       default:
@@ -121,6 +125,12 @@ const FactoryDashboard = () => {
             text="產線智能助手"
             active={activeTab === "assistant"}
             onClick={() => setActiveTab("assistant")}
+          />
+          <SideNavItem
+            icon={FileText}
+            text="日誌分析"
+            active={activeTab === "log-analysis"}
+            onClick={() => setActiveTab("log-analysis")}
           />
           <SideNavItem
             icon={Settings}

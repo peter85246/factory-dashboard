@@ -24,4 +24,24 @@ module.exports = function (app) {
       },
     }),
   );
+
+  // 日誌分析的代理
+  // app.use(
+  //   "/api/log-analysis",
+  //   createProxyMiddleware({
+  //     target: "https://f1m76mqd-8000.asse.devtunnels.ms",
+  //     changeOrigin: true,
+  //     pathRewrite: {
+  //       "^/api/log-analysis": "/conversation",
+  //     },
+  //     onProxyRes: function (proxyRes, req, res) {
+  //       proxyRes.headers["Access-Control-Allow-Origin"] = "*";
+  //       proxyRes.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS";
+  //       proxyRes.headers["Access-Control-Allow-Headers"] = "Content-Type";
+  //     },
+  //     onError: (err, req, res) => {
+  //       console.error("Log Analysis Proxy Error:", err);
+  //     },
+  //   })
+  // );
 };
