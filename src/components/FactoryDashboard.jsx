@@ -13,6 +13,7 @@ import {
   Bot,
   FileText,
   ClipboardList,
+  Award,
 } from "lucide-react";
 import { SideNavItem } from "./dashboard/SideNavItem";
 import { MachineList } from "./dashboard/MachineList";
@@ -26,6 +27,7 @@ import { getStatusSummary } from "../data/mockData";
 import ProductionAssistant from "./ProductionAssistant";
 import LogAnalysis from "./LogAnalysis";
 import OrderAssistant from "./OrderAssistant";
+import PerformanceDashboard from "./PerformanceDashboard";
 
 const FactoryDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -55,6 +57,8 @@ const FactoryDashboard = () => {
         return <ProductionHistory />;
       case "stats":
         return <Statistics />;
+      case "performance":
+        return <PerformanceDashboard />;
       case "assistant":
         return <ProductionAssistant />;
       case "order-assistant":
@@ -123,6 +127,12 @@ const FactoryDashboard = () => {
             text="統計分析"
             active={activeTab === "stats"}
             onClick={() => setActiveTab("stats")}
+          />
+          <SideNavItem
+            icon={Award}
+            text="績效考核"
+            active={activeTab === "performance"}
+            onClick={() => setActiveTab("performance")}
           />
           <SideNavItem
             icon={Bot}

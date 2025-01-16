@@ -438,14 +438,14 @@ const LogAnalysis = () => {
             ref={fileInputRef}
             style={{ display: "none" }}
           />
-          <button
+          {/* <button
             type="button"
             className="upload-button"
             disabled={isLoading || isTyping}
             onClick={() => fileInputRef.current?.click()}
           >
             <ImageIcon className="w-5 h-5" />
-          </button>
+          </button> */}
           <button
             type="submit"
             className="send-button"
