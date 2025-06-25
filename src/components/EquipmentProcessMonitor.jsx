@@ -796,25 +796,41 @@ export const EquipmentProcessMonitor = () => {
     initDevices();
   }, [selectedDevice]);
 
-  // 定期更新數據（保持用戶選擇的日期範圍不變）
-  useEffect(() => {
-    if (selectedDevice) {
-      const interval = setInterval(() => {
-        // 只在用戶選擇的時間範圍內更新數據，不修改日期
-        console.log('定期更新數據，保持用戶選擇的時間範圍');
-        fetchEquipmentData();
-      }, 10000); // 每10秒更新一次數據
-
-      return () => clearInterval(interval);
+  // 手動查詢函數 - 新增2秒載入動畫
+  const handleManualQuery = async () => {
+    if (!selectedDevice) {
+      setError('請先選擇設備');
+      return;
     }
-  }, [selectedDevice, fetchEquipmentData]);
+    
+    setLoading(true);
+    setError(null);
+    
+    // 增加2秒的載入動畫來提升用戶體驗
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    await fetchEquipmentData();
+  };
 
-  // 當選中設備或時間範圍改變時獲取數據
-  useEffect(() => {
-    if (selectedDevice) {
-      fetchEquipmentData();
-    }
-  }, [selectedDevice, dateRange, fetchEquipmentData]);
+  // 定期更新數據（保持用戶選擇的日期範圍不變）- 移除自動更新
+  // useEffect(() => {
+  //   if (selectedDevice) {
+  //     const interval = setInterval(() => {
+  //       // 只在用戶選擇的時間範圍內更新數據，不修改日期
+  //       console.log('定期更新數據，保持用戶選擇的時間範圍');
+  //       fetchEquipmentData();
+  //     }, 10000); // 每10秒更新一次數據
+
+  //     return () => clearInterval(interval);
+  //   }
+  // }, [selectedDevice, fetchEquipmentData]);
+
+  // 移除自動查詢功能 - 改為手動查詢
+  // useEffect(() => {
+  //   if (selectedDevice) {
+  //     fetchEquipmentData();
+  //   }
+  // }, [selectedDevice, dateRange, fetchEquipmentData]);
 
   // 計算相關性係數 (電流與溫度)
   const calculateCorrelation = (data, param1, param2) => {
@@ -989,10 +1005,13 @@ export const EquipmentProcessMonitor = () => {
           {/* 查詢按鈕 */}
           <div>
             <button
-              onClick={fetchEquipmentData}
+              onClick={handleManualQuery}
               disabled={!selectedDevice || loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-4 py-2.5 rounded-md transition-colors"
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-4 py-2.5 rounded-md transition-colors flex items-center justify-center"
             >
+              {loading && (
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+              )}
               {loading ? '查詢中...' : '查詢數據'}
             </button>
           </div>
@@ -1004,7 +1023,7 @@ export const EquipmentProcessMonitor = () => {
             {loading && (
               <div className="flex items-center text-blue-400">
                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-400 border-t-transparent mr-2" />
-                <span className="text-sm">更新中...</span>
+                <span className="text-sm">正在載入數據...</span>
               </div>
             )}
             {userModifiedTime && (
@@ -1133,7 +1152,12 @@ export const EquipmentProcessMonitor = () => {
             </ResponsiveContainer>
           ) : (
             <div className="flex items-center justify-center h-full text-gray-500">
-              {loading ? '載入中...' : '請選擇設備並設定時間範圍查詢數據'}
+              {loading ? (
+                <div className="flex flex-col items-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-400 border-t-transparent mb-2" />
+                  <span>正在載入數據...</span>
+                </div>
+              ) : '請選擇設備並設定時間範圍，然後點擊"查詢數據"'}
             </div>
           )}
         </div>
