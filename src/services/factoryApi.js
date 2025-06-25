@@ -94,6 +94,56 @@ export const factoryApi = {
       }
     },
   },
+
+  // 設備製程監控 API
+  equipmentProcess: {
+    getDetectedContent: async (startTime, endTime, camIndex) => {
+      try {
+        console.log("Fetching equipment process data:", { startTime, endTime, camIndex });
+
+        const response = await axios.get('http://127.0.0.1:9000/get_detected_content', {
+          params: {
+            start_time: startTime,
+            end_time: endTime,
+            cam_index: camIndex
+          }
+        });
+
+        console.log("Equipment process API response:", response.data);
+        return response.data;
+      } catch (error) {
+        console.error("Error fetching equipment process data:", error);
+        throw error;
+      }
+    },
+
+    // 獲取所有可用設備列表 - 更新為與後端真實數據對應
+    getAvailableDevices: async () => {
+      try {
+        // 根據您後端真實數據的設備映射
+        const availableDevices = [
+          { 
+            id: "1", 
+            name: "設備2", 
+            type: "CNC設備", 
+            cam_index: "1",
+            description: "設備2：ID5(電流) + ID6(溫度)"
+          },
+          { 
+            id: "2", 
+            name: "設備3", 
+            type: "CNC設備", 
+            cam_index: "2",
+            description: "設備3：ID2(電流) + ID1(溫度)"
+          }
+        ];
+        return availableDevices;
+      } catch (error) {
+        console.error("Error fetching available devices:", error);
+        throw error;
+      }
+    }
+  }
 };
 
 // 定義狀態優先順序

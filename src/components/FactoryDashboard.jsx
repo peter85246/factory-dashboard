@@ -14,6 +14,7 @@ import {
   FileText,
   ClipboardList,
   Award,
+  Gauge,
 } from "lucide-react";
 import { SideNavItem } from "./dashboard/SideNavItem";
 import { MachineList } from "./dashboard/MachineList";
@@ -28,6 +29,7 @@ import ProductionAssistant from "./ProductionAssistant";
 import LogAnalysis from "./LogAnalysis";
 import OrderAssistant from "./OrderAssistant";
 import PerformanceDashboard from "./PerformanceDashboard";
+import { EquipmentProcessMonitor } from "./EquipmentProcessMonitor";
 
 const FactoryDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -53,6 +55,8 @@ const FactoryDashboard = () => {
         return <OEEDashboard />;
       case "monitor":
         return <MonitorView />;
+      case "equipment-process":
+        return <EquipmentProcessMonitor />;
       case "history":
         return <ProductionHistory />;
       case "stats":
@@ -115,6 +119,12 @@ const FactoryDashboard = () => {
             text="設備監控"
             active={activeTab === "monitor"}
             onClick={() => setActiveTab("monitor")}
+          />
+          <SideNavItem
+            icon={Gauge}
+            text="設備製程監控"
+            active={activeTab === "equipment-process"}
+            onClick={() => setActiveTab("equipment-process")}
           />
           <SideNavItem
             icon={Clock}
